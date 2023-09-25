@@ -1,0 +1,9 @@
+name = "cheri_rop"
+description = "Return oriented programm example on CHERI"
+version = "0.1.0"
+
+authors = ["Johannes Kliemann"]
+maintainers = ["Johannes Kliemann <kliemann@adacore.com>"]
+maintainers-logins = ["jklmnn"]
+
+executables = ["cheri_rop"]

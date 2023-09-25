@@ -1,0 +1,29 @@
+with "config/cheri_rop_config.gpr";
+project Cheri_Rop is
+
+   for Source_Dirs use ("src/", "config/");
+   for Object_Dir use "obj/" & Cheri_Rop_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "bin";
+   for Target use "morello-elf";
+   for Runtime ("Ada") use "light-morello-semihosting";
+   for Main use (
+      "main_stack.adb",
+      "main_fp.adb",
+      "main_write_code.adb",
+      "main_exec_stack.adb"
+   );
+
+   package Compiler is
+      for Default_Switches ("Ada") use Cheri_Rop_Config.Ada_Compiler_Switches & ("-g", "-gnatp");
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end Cheri_Rop;
