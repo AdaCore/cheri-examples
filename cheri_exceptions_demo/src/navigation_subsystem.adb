@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with Ada.Numerics;                      use Ada.Numerics;
 with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Ada.Real_Time;                     use Ada.Real_Time;
@@ -17,17 +29,33 @@ package body Navigation_Subsystem is
    Earth_Radius : constant := 6_371_000.0;
    --  Mean radius of the earth in meters
 
+   ----------------
+   -- To_Radians --
+   ----------------
+
    function To_Radians (Degrees : Float) return Float is
      (Degrees * (Pi / 180.0));
    --  Convert from degrees to radians
+
+   ----------------
+   -- To_Degrees --
+   ----------------
 
    function To_Degrees (Radians : Float) return Float is
      (Radians * (180.0 / Pi));
    --  Convert from radians to degrees
 
+   --------------------------
+   -- To_Meters_Per_Second --
+   --------------------------
+
    function To_Meters_Per_Second (Speed : Knots) return Float is
      (Float (Speed) * 0.514_444);
    --  Convert from knots to meters per second
+
+   ---------------------
+   -- Update_Position --
+   ---------------------
 
    function Update_Position
      (Old_Pos : Coordinate;
@@ -45,6 +73,20 @@ package body Navigation_Subsystem is
 
    protected body Navigation_Data is
 
+      --------------------------
+      -- Get_Position_Changed --
+      --------------------------
+
+      procedure Get_Position_Changed (Changed : out Boolean) is
+      begin
+         if Position_Changed then
+            Changed := True;
+            Position_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Get_Position_Changed;
+
       ------------------
       -- Get_Position --
       ------------------
@@ -57,8 +99,23 @@ package body Navigation_Subsystem is
 
       procedure Set_Position (Position : Coordinate) is
       begin
+         Position_Changed := Current_Position /= Position;
          Current_Position := Position;
       end Set_Position;
+
+      -------------------------
+      -- Get_Heading_Changed --
+      -------------------------
+
+      procedure Get_Heading_Changed (Changed : out Boolean) is
+      begin
+         if Heading_Changed then
+            Changed := True;
+            Heading_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Get_Heading_Changed;
 
       -----------------
       -- Get_Heading --
@@ -72,6 +129,7 @@ package body Navigation_Subsystem is
 
       procedure Set_Heading (Heading : Bearing) is
       begin
+         Heading_Changed := Current_Heading /= Heading;
          Current_Heading := Heading;
       end Set_Heading;
 

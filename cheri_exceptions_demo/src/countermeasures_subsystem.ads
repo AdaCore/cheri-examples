@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with System;
 with Monitored_Tasking;
 
@@ -17,6 +29,8 @@ package Countermeasures_Subsystem is
 
    protected Countermeasures_Control is
 
+      procedure Get_Status_Change (Change : out Boolean);
+
       function Get_Status return Status_Kind;
 
       procedure Deploy;
@@ -29,6 +43,7 @@ package Countermeasures_Subsystem is
 
       Deploy_Requested : Boolean     := False;
       Status           : Status_Kind := Ready;
+      Status_Change    : Boolean     := True;
 
    end Countermeasures_Control;
 

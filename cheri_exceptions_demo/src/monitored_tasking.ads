@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with Ada.Exceptions;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with System;
@@ -50,8 +62,11 @@ package Monitored_Tasking is
       procedure Set_Status (Status : Task_Status_Kind);
       --  Set the task status
 
-      function Status return Task_Status_Kind;
+      function Get_Status return Task_Status_Kind;
       --  Get the task status
+
+      procedure Status (Status : out Task_Status_Kind; Changed : out Boolean);
+      --  Get the task status and if it has changed
 
       procedure Reset;
       --  Send a request to the task to reset
@@ -78,6 +93,7 @@ package Monitored_Tasking is
 
       Stored_Exception        : Ada.Exceptions.Exception_Occurrence;
       Current_Status          : Task_Status_Kind := Normal;
+      Status_Change           : Boolean          := True;
       Exception_Occurred_Flag : Boolean          := False;
       Reset_Requested_Flag    : Boolean          := False;
       PBIT_Status             : BIT_Result_Type  := Default_BIT_State;

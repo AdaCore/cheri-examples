@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with System;
 
 with Monitored_Tasking;
@@ -25,8 +37,14 @@ package Fuel_Subsystem is
       function Fuel_Quantity_Available return Boolean;
       --  Query whether the fuel quantity data is available
 
+      procedure Fuel_Quantity_Changed (Changed : out Boolean);
+      --  Return true if the fuel level has changed since last read
+
       function Fuel_Quantity return Kilograms;
       --  Read the last calculated fuel quantity
+
+      procedure Time_To_Minimum_Fuel_Changed (Changed : out Boolean);
+      --  Return true if the bingo time has changed since last read
 
       function Time_To_Minimum_Fuel return Duration;
       --  Read the estimated time remaining until minimum fuel is reached
@@ -48,11 +66,13 @@ package Fuel_Subsystem is
 
    private
 
-      FQI_Value       : Kilograms := 2_400.0;
-      FQI_Valid       : Boolean   := True;
+      FQI_Value   : Kilograms := 2_400.0;
+      FQI_Valid   : Boolean   := True;
+      FQI_Changed : Boolean   := True;
 
-      Time_To_Minimum_Fuel_Value : Duration  := 0.0;
-      Time_To_Minimum_Fuel_Valid : Boolean   := False;
+      Time_To_Minimum_Fuel_Value       : Duration := 0.0;
+      Time_To_Minimum_Fuel_Valid       : Boolean  := False;
+      Time_To_Minimum_Fuel_Has_Changed : Boolean  := True;
 
    end Fuel_Data;
 

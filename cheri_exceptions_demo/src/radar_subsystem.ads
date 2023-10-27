@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with System;
 with System.Storage_Elements; use System.Storage_Elements;
 
@@ -51,11 +63,15 @@ package Radar_Subsystem is
 
    protected Radar_Data is
 
+      procedure Is_Operational_Changed (Changed : out Boolean);
+
       function Is_Operational return Boolean;
 
       procedure Set_Operational (Operational : Boolean);
 
       function Tracks return Track_Array;
+
+      procedure Have_Tracks_Changed (Changed : out Boolean);
 
       procedure Add_Track (T : Track);
 
@@ -64,9 +80,11 @@ package Radar_Subsystem is
    private
 
       Operational_Flag : Boolean := False;
+      Operational_Flag_Changed : Boolean := True;
 
       Tracks_List : Track_Array (1 .. Max_Tracks) := (others => <>);
       Num_Tracks  : Track_Count := 0;
+      Num_Tracks_Changed : Boolean := True;
 
    end Radar_Data;
 

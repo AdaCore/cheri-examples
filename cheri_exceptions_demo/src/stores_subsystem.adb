@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with Ada.Real_Time; use Ada.Real_Time;
 
 with Targeting_Subsystem;
@@ -14,11 +26,35 @@ package body Stores_Subsystem is
 
    protected body Stores_Data is
 
+      ------------------------------
+      -- Get_Light_Status_Changed --
+      ------------------------------
+
+      procedure Get_Light_Status_Changed
+        (Idx : Light_Index; Changed : out Boolean) is
+      begin
+
+         if Targeting_Subsystem.Targeting_Task_Control.Get_Status /= Degraded
+         then
+            Changed := True;
+         else
+            if Light_Status_Changed (Idx) then
+               Changed := True;
+               Light_Status_Changed (Idx) := False;
+            else
+               Changed := False;
+            end if;
+         end if;
+      end Get_Light_Status_Changed;
+
+      ----------------------
+      -- Get_Light_Status --
+      ----------------------
+
       function Get_Light_Status (Idx : Light_Index) return Status_Kind is
       begin
          --  Light armaments require targeting data
-
-         if Targeting_Subsystem.Targeting_Task_Control.Status = Normal then
+         if Targeting_Subsystem.Targeting_Task_Control.Get_Status = Normal then
             return Light_Status (Idx);
          elsif Light_Status (Idx) = Launched then
             return Launched;
@@ -27,23 +63,52 @@ package body Stores_Subsystem is
          end if;
       end Get_Light_Status;
 
+      ------------------------------
+      -- Get_Heavy_Status_Changed --
+      ------------------------------
+
+      procedure Get_Heavy_Status_Changed
+        (Idx : Heavy_Index; Changed : out Boolean) is
+      begin
+         if Heavy_Status_Changed (Idx) then
+            Changed := True;
+            Heavy_Status_Changed (Idx) := False;
+         else
+            Changed := False;
+         end if;
+      end Get_Heavy_Status_Changed;
+
+      ----------------------
+      -- Get_Heavy_Status --
+      ----------------------
+
       function Get_Heavy_Status (Idx : Heavy_Index) return Status_Kind is
         (Heavy_Status (Idx));
+
+      ------------------
+      -- Launch_Light --
+      ------------------
 
       procedure Launch_Light is
       begin
          for Idx in Light_Index loop
             if Get_Light_Status (Idx) = Ready then
+               Light_Status_Changed (Idx) := True;
                Light_Status (Idx) := Launched;
                exit;
             end if;
          end loop;
       end Launch_Light;
 
+      ------------------
+      -- Launch_Heavy --
+      ------------------
+
       procedure Launch_Heavy is
       begin
          for Idx in Heavy_Index loop
             if Get_Heavy_Status (Idx) = Ready then
+               Heavy_Status_Changed (Idx) := True;
                Heavy_Status (Idx) := Launched;
                exit;
             end if;
@@ -52,17 +117,33 @@ package body Stores_Subsystem is
 
    end Stores_Data;
 
+   --------------------
+   -- Stores_Control --
+   --------------------
+
    protected body Stores_Control is
+
+      --------------------------
+      -- Request_Launch_Light --
+      --------------------------
 
       procedure Request_Launch_Light is
       begin
          Launch_Light := True;
       end Request_Launch_Light;
 
+      --------------------------
+      -- Request_Launch_Heavy --
+      --------------------------
+
       procedure Request_Launch_Heavy is
       begin
          Launch_Heavy := True;
       end Request_Launch_Heavy;
+
+      ------------------
+      -- Get_Requests --
+      ------------------
 
       procedure Get_Requests
         (Light_Requested : out Boolean;
@@ -78,6 +159,10 @@ package body Stores_Subsystem is
 
    end Stores_Control;
 
+   ---------------------
+   -- Simulate_Stores --
+   ---------------------
+
    procedure Simulate_Stores is
       Next_Time : Time := Clock;
 
@@ -85,7 +170,8 @@ package body Stores_Subsystem is
       Heavy_Requested : Boolean;
    begin
       loop
-         if Targeting_Subsystem.Targeting_Task_Control.Status /= Normal then
+         if Targeting_Subsystem.Targeting_Task_Control.Get_Status /= Normal
+         then
             Stores_Task_Control.Set_Status (Degraded);
          else
             Stores_Task_Control.Set_Status (Normal);

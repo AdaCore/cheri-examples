@@ -1,8 +1,20 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
+
 with System;
 with Monitored_Tasking;
 
@@ -27,9 +39,13 @@ package Navigation_Subsystem is
 
    protected Navigation_Data is
 
+      procedure Get_Position_Changed (Changed : out Boolean);
+
       function Get_Position return Coordinate;
 
       procedure Set_Position (Position : Coordinate);
+
+      procedure Get_Heading_Changed (Changed : out Boolean);
 
       function Get_Heading return Bearing;
 
@@ -38,7 +54,9 @@ package Navigation_Subsystem is
    private
 
       Current_Position : Coordinate := (0.0, 0.0);
+      Position_Changed : Boolean    := True;
       Current_Heading  : Bearing    := 0;
+      Heading_Changed  : Boolean    := True;
 
    end Navigation_Data;
 

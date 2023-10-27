@@ -1,8 +1,19 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
 
 with Countermeasures_Subsystem;
 with Flight_Subsystem;
@@ -12,23 +23,51 @@ with Radar_Subsystem;
 with Stores_Subsystem;
 with Targeting_Subsystem;
 
-package body Integrated_Monitoring_And_Recording_Subsystem is
+package body Built_In_Test_Subsystem is
 
    Update_Period : constant Time_Span := Seconds (1);
+
+   -----------------------------
+   -- Get_PBIT_Status_Changed --
+   -----------------------------
+
+   procedure Get_PBIT_Status_Changed (Changed : out Boolean) is
+   begin
+      Built_In_Test_Data.Get_OVerall_PBIT_Status_Changed (Changed);
+   end Get_PBIT_Status_Changed;
 
    ---------------------
    -- Get_PBIT_Status --
    ---------------------
 
    function Get_PBIT_Status return BIT_Pass_Fail_Type is
-      (IMRS_Data.Get_PBIT_Status);
+      (Built_In_Test_Data.Get_Overall_PBIT_Status);
+
+   -----------------------------
+   -- Get_CBIT_Status_Changed --
+   -----------------------------
+
+   procedure Get_CBIT_Status_Changed (Changed : out Boolean) is
+   begin
+      Built_In_Test_Data.Get_Overall_CBIT_Status_Changed (Changed);
+   end Get_CBIT_Status_Changed;
 
    ---------------------
    -- Get_CBIT_Status --
    ---------------------
 
    function Get_CBIT_Status return BIT_Pass_Fail_Type is
-     (IMRS_Data.Get_CBIT_Status);
+     (Built_In_Test_Data.Get_Overall_CBIT_Status);
+
+   -----------------------------
+   -- Get_PBIT_Status_Changed --
+   -----------------------------
+
+   procedure Get_PBIT_Status_Changed
+     (Subsystem : Subsystem_Name_Type; Changed : out Boolean) is
+   begin
+      Built_In_Test_Data.Get_PBIT_Status_Changed (Subsystem, Changed);
+   end Get_PBIT_Status_Changed;
 
    ---------------------
    -- Get_PBIT_Status --
@@ -36,7 +75,17 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
    function Get_PBIT_Status (Subsystem : Subsystem_Name_Type)
                              return BIT_Pass_Fail_Type is
-      (IMRS_Data.Get_PBIT_Status (Subsystem));
+      (Built_In_Test_Data.Get_PBIT_Status (Subsystem));
+
+   -----------------------------
+   -- Get_CBIT_Status_Changed --
+   -----------------------------
+
+   procedure Get_CBIT_Status_Changed
+     (Subsystem : Subsystem_Name_Type; Changed : out Boolean) is
+   begin
+      Built_In_Test_Data.Get_CBIT_Status_Changed (Subsystem, Changed);
+   end Get_CBIT_Status_Changed;
 
    ---------------------
    -- Get_CBIT_Status --
@@ -44,34 +93,29 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
    function Get_CBIT_Status (Subsystem : Subsystem_Name_Type)
                              return BIT_Pass_Fail_Type is
-     (IMRS_Data.Get_CBIT_Status (Subsystem));
+     (Built_In_Test_Data.Get_CBIT_Status (Subsystem));
 
-   --------------
-   -- Get_PBIT --
-   --------------
+   -------------------------------------
+   -- Get_BIT_Historic_Report_Changed --
+   -------------------------------------
 
-   function Get_PBIT_Report return String is
-      (IMRS_Data.Get_PBIT);
-
-   --------------
-   -- Get_CBIT --
-   --------------
-
-   function Get_CBIT_Report return String is
-      (IMRS_Data.Get_CBIT);
+   procedure Get_BIT_Historic_Report_Changed (Changed : out Boolean) is
+   begin
+      Built_In_Test_Data.Get_BIT_Historic_Report_Changed (Changed);
+   end Get_BIT_Historic_Report_Changed;
 
    ------------------------------
    -- Get_CBIT_Historic_Report --
    ------------------------------
 
    function Get_BIT_Historic_Report return Historic_BIT_Entries_Data is
-      (IMRS_Data.Get_Historic_BIT_Report);
+      (Built_In_Test_Data.Get_Historic_BIT_Report);
 
    ---------------
-   -- IMRS_Data --
+   -- Built_In_Test_Data --
    ---------------
 
-   protected body IMRS_Data is
+   protected body Built_In_Test_Data is
 
       --------------------
       -- Get_BIT_Status --
@@ -94,6 +138,36 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
          return Not_Performed;
       end Get_BIT_Status;
+
+      ----------------------------
+      -- Get_BIT_Status_Changed --
+      ----------------------------
+
+      procedure Get_BIT_Status_Changed
+        (BIT_List : Subsystem_BIT_Status_List; Subsystem : Subsystem_Name_Type;
+         Changed : out Boolean)
+      is
+         Next_Entry : Subsystem_BIT_Status_List_Entry_Access :=
+           BIT_List.Head;
+         Found_Entry : Boolean := False;
+      begin
+
+         --  Loop until we have found the subsystem we are interested in
+         while Next_Entry /= null and then Found_Entry = False loop
+            if Next_Entry.Subsystem = Subsystem then
+               Changed := Next_Entry.Changed;
+               Next_Entry.Changed := False;
+               Found_Entry := True;
+               exit;
+            end if;
+            Next_Entry := Next_Entry.Next;
+         end loop;
+
+         if not Found_Entry then
+            Changed := False;
+         end if;
+
+      end Get_BIT_Status_Changed;
 
        -------------------------------------------
        -- Convert_BIT_Results_To_Overall_Status --
@@ -132,37 +206,6 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
          end if;
       end Convert_BIT_Results_To_Overall_Status;
 
-      -----------------------------------
-      -- Convert_BIT_Results_To_String --
-      -----------------------------------
-
-      function Convert_BIT_Results_To_String
-        (BIT_List : Subsystem_BIT_Status_List) return String
-      is
-         Return_String : Unbounded_String := To_Unbounded_String ("");
-         Next_Entry : Subsystem_BIT_Status_List_Entry_Access :=
-           BIT_List.Head;
-      begin
-
-         if Next_Entry = null then
-            Return_String := To_Unbounded_String ("N/A");
-         else
-            while Next_Entry /= null loop
-               Append (Return_String, To_Unbounded_String
-                       (Next_Entry.Subsystem'Image));
-               Append (Return_String, To_Unbounded_String
-                       (" : "));
-               Append (Return_String, To_Unbounded_String
-                       (Next_Entry.Result.Result'Image));
-               Append (Return_String, To_Unbounded_String
-                       (" | "));
-               Next_Entry := Next_Entry.Next;
-            end loop;
-         end if;
-
-         return To_String (Return_String);
-      end Convert_BIT_Results_To_String;
-
       ----------------------------------
       -- Add_New_Entry_To_BIT_Results --
       ----------------------------------
@@ -181,6 +224,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
          while Next_Entry /= null loop
             if Next_Entry.Subsystem = Subsystem then
                Next_Entry.Result     := BIT_Entry;
+               Next_Entry.Changed    := True;
                Entry_Not_In_List     := False;
                exit;
             else
@@ -195,6 +239,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
                  new Subsystem_BIT_Status_List_Entry'
                    (Subsystem  => Subsystem,
                     Result     => BIT_Entry,
+                    Changed    => True,
                     Next       => null);
             begin
                if BIT_List.Head = null then
@@ -237,6 +282,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
                  new Subsystem_BIT_Status_List_Entry'
                    (Subsystem  => Subsystem,
                     Result     => BIT_Entry,
+                    Changed    => True,
                     Next       => null);
             begin
                if BIT_Failures.Head = null then
@@ -248,12 +294,37 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
             end;
          end if;
       end Add_Entry_To_Historic_BIT_Results;
+
+      -----------------------------
+      -- Get_PBIT_Status_Changed --
+      -----------------------------
+
+      procedure Get_Overall_PBIT_Status_Changed (Changed : out Boolean) is
+      begin
+         if PBIT_Changed then
+            Changed := True;
+            PBIT_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Get_Overall_PBIT_Status_Changed;
+
       ---------------------
       -- Get_PBIT_Status --
       ---------------------
 
-      function Get_PBIT_Status return BIT_Pass_Fail_Type is
+      function Get_Overall_PBIT_Status return BIT_Pass_Fail_Type is
         (Convert_BIT_Results_To_Overall_Status (Current_PBIT));
+
+      -----------------------------
+      -- Get_PBIT_Status_Changed --
+      -----------------------------
+
+      procedure Get_PBIT_Status_Changed
+        (Subsystem : Subsystem_Name_Type; Changed : out Boolean) is
+      begin
+         Get_BIT_Status_Changed (Current_PBIT, Subsystem, Changed);
+      end Get_PBIT_Status_Changed;
 
       ---------------------
       -- Get_PBIT_Status --
@@ -263,12 +334,36 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
                                 return BIT_Pass_Fail_Type is
         (Get_BIT_Status (Current_PBIT, Subsystem));
 
+      -----------------------------
+      -- Get_PBIT_Status_Changed --
+      -----------------------------
+
+      procedure Get_Overall_CBIT_Status_Changed (Changed : out Boolean) is
+      begin
+         if CBIT_Changed then
+            Changed := True;
+            CBIT_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Get_Overall_CBIT_Status_Changed;
+
       ---------------------
       -- Get_CBIT_Status --
       ---------------------
 
-      function Get_CBIT_Status return BIT_Pass_Fail_Type is
+      function Get_Overall_CBIT_Status return BIT_Pass_Fail_Type is
         (Convert_BIT_Results_To_Overall_Status (Current_CBIT));
+
+      ---------------------
+      -- Get_CBIT_Status --
+      ---------------------
+
+      procedure Get_CBIT_Status_Changed
+        (Subsystem : Subsystem_Name_Type; Changed : out Boolean) is
+      begin
+         Get_BIT_Status_Changed (Current_CBIT, Subsystem, Changed);
+      end Get_CBIT_Status_Changed;
 
       ---------------------
       -- Get_CBIT_Status --
@@ -279,19 +374,15 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
         (Get_BIT_Status (Current_CBIT, Subsystem));
 
       --------------
-      -- Get_PBIT --
-      --------------
-
-      function Get_PBIT return String is
-        (Convert_BIT_Results_To_String (Current_PBIT));
-
-      --------------
       -- Set_PBIT --
       --------------
 
       procedure Set_PBIT (PBIT : BIT_Result_Type;
                           Subsystem : Subsystem_Name_Type) is
       begin
+
+         PBIT_Changed := True;
+
          Add_New_Entry_To_BIT_Results
            (BIT_Entry => PBIT,
             Subsystem => Subsystem,
@@ -306,12 +397,19 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
       end Set_PBIT;
 
-      --------------
-      -- Get_CBIT --
-      --------------
+      -------------------------------------
+      -- Get_BIT_Historic_Report_Changed --
+      -------------------------------------
 
-      function Get_CBIT return String is
-        (Convert_BIT_Results_To_String (Current_CBIT));
+      procedure Get_BIT_Historic_Report_Changed (Changed : out Boolean) is
+      begin
+         if Report_Changed then
+            Changed := True;
+            Report_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Get_BIT_Historic_Report_Changed;
 
       -----------------------
       -- Get_Historic_CBIT --
@@ -365,6 +463,10 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
       procedure Set_CBIT (CBIT      : BIT_Result_Type;
                           Subsystem : Subsystem_Name_Type) is
       begin
+
+         CBIT_Changed := True;
+         Report_Changed := True;
+
          --  Add results to the active list
          Add_New_Entry_To_BIT_Results
            (BIT_Entry => CBIT,
@@ -379,7 +481,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
          end if;
       end Set_CBIT;
 
-   end IMRS_Data;
+   end Built_In_Test_Data;
 
    ----------
    -- PBIT --
@@ -387,7 +489,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
    procedure PBIT is
    begin
-      IMRS_Control_Task.Set_PBIT (Pass_BIT_State);
+      Built_In_Test_Control_Task.Set_PBIT (Pass_BIT_State);
    end PBIT;
 
    ----------
@@ -396,14 +498,14 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
    procedure CBIT is
    begin
-      IMRS_Control_Task.Set_CBIT (Pass_BIT_State);
+      Built_In_Test_Control_Task.Set_CBIT (Pass_BIT_State);
    end CBIT;
 
    ----------------------------
-   -- Perform_IMRS_Functions --
+   -- Perform_Built_In_Test_Functions --
    ----------------------------
 
-   procedure Perform_IMRS_Functions is
+   procedure Perform_Built_In_Test_Functions is
       Next_Time : Ada.Real_Time.Time;
    begin
       Next_Time := Ada.Real_Time.Clock;
@@ -416,7 +518,7 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
       Next_Time := Next_Time + Update_Period;
       delay until Next_Time;
 
-   end Perform_IMRS_Functions;
+   end Perform_Built_In_Test_Functions;
 
    ------------------
    -- Perform_PBIT --
@@ -425,8 +527,8 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
    function Collate_PBIT_Report return Boolean is
 
       --  Get all of the PBIT results from each subsystem
-      IMRS_PBIT : constant BIT_Result_Type :=
-        IMRS_Control_Task.Get_PBIT;
+      Built_In_Test_PBIT : constant BIT_Result_Type :=
+        Built_In_Test_Control_Task.Get_PBIT;
 
       Countermeasures_PBIT : constant BIT_Result_Type :=
         Countermeasures_Subsystem.Countermeasures_Task_Control.Get_PBIT;
@@ -451,35 +553,35 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
 
    begin
 
-      IMRS_Data.Set_PBIT
-        (PBIT      => IMRS_PBIT,
-         Subsystem => IMRS);
+      Built_In_Test_Data.Set_PBIT
+        (PBIT      => Built_In_Test_PBIT,
+         Subsystem => Built_In_Test);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Countermeasures_PBIT,
          Subsystem => Countermeasures);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Flight_PBIT,
          Subsystem => Flight);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Fuel_PBIT,
          Subsystem => Fuel);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Navigation_PBIT,
          Subsystem => Navigation);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Radar_PBIT,
          Subsystem => Radar);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Stores_PBIT,
          Subsystem => Stores);
 
-      IMRS_Data.Set_PBIT
+      Built_In_Test_Data.Set_PBIT
         (PBIT      => Targeting_PBIT,
          Subsystem => Targeting);
 
@@ -516,38 +618,38 @@ package body Integrated_Monitoring_And_Recording_Subsystem is
    begin
 
       --  Derive the latest set of results
-      IMRS_Data.Set_CBIT
-        (CBIT      => IMRS_Control_Task.Get_CBIT,
-         Subsystem => IMRS);
+      Built_In_Test_Data.Set_CBIT
+        (CBIT      => Built_In_Test_Control_Task.Get_CBIT,
+         Subsystem => Built_In_Test);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT =>
            Countermeasures_Subsystem.Countermeasures_Task_Control.Get_CBIT,
          Subsystem => Countermeasures);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Flight_Subsystem.Flight_Task_Control.Get_CBIT,
          Subsystem => Flight);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Fuel_Subsystem.Fuel_Task_Control.Get_CBIT,
          Subsystem => Fuel);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Navigation_Subsystem.Navigation_Task_Control.Get_CBIT,
          Subsystem => Navigation);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Radar_Subsystem.Radar_Task_Control.Get_CBIT,
          Subsystem => Radar);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Stores_Subsystem.Stores_Task_Control.Get_CBIT,
          Subsystem => Stores);
 
-      IMRS_Data.Set_CBIT
+      Built_In_Test_Data.Set_CBIT
         (CBIT      => Targeting_Subsystem.Targeting_Task_Control.Get_CBIT,
          Subsystem => Targeting);
    end Collate_CBIT_Report;
 
-end Integrated_Monitoring_And_Recording_Subsystem;
+end Built_In_Test_Subsystem;

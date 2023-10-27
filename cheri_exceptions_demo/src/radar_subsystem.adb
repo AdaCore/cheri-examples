@@ -1,11 +1,19 @@
---
---  Copyright (C) 2023, AdaCore
---
---  SPDX-License-Identifier: Apache-2.0
---
-
---  with Ada.Exceptions;
---  with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+------------------------------------------------------------------------------
+--                           GNAT Pro Morello                               --
+--                                                                          --
+--                     Copyright (C) 2024, AdaCore                          --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
 
 package body Radar_Subsystem is
 
@@ -14,6 +22,20 @@ package body Radar_Subsystem is
    ----------------
 
    protected body Radar_Data is
+
+      ----------------------------
+      -- Is_Operational_Changed --
+      ----------------------------
+
+      procedure Is_Operational_Changed (Changed : out Boolean) is
+      begin
+         if Operational_Flag_Changed then
+            Changed := True;
+            Operational_Flag_Changed := False;
+         else
+            Changed := False;
+         end if;
+      end Is_Operational_Changed;
 
       --------------------
       -- Is_Operational --
@@ -29,6 +51,20 @@ package body Radar_Subsystem is
       begin
          Operational_Flag := Operational;
       end Set_Operational;
+
+      -------------------------
+      -- Have_Tracks_Changed --
+      -------------------------
+
+      procedure Have_Tracks_Changed (Changed : out Boolean) is
+      begin
+         if Num_Tracks_Changed then
+            Changed := True;
+            Num_Tracks_Changed := False;
+         else
+            Changed := True;
+         end if;
+      end Have_Tracks_Changed;
 
       ------------
       -- Tracks --
@@ -46,6 +82,7 @@ package body Radar_Subsystem is
             Num_Tracks := Num_Tracks + 1;
             Tracks_List (Num_Tracks) := T;
          end if;
+         Num_Tracks_Changed := True;
       end Add_Track;
 
       ------------------
@@ -55,6 +92,7 @@ package body Radar_Subsystem is
       procedure Clear_Tracks is
       begin
          Num_Tracks := 0;
+         Num_Tracks_Changed := True;
       end Clear_Tracks;
 
    end Radar_Data;
@@ -162,26 +200,5 @@ package body Radar_Subsystem is
    begin
       Radar_Task_Control.Set_CBIT (Pass_BIT_State);
    end CBIT;
-
-   --
-   --     use Monitored_Tasking;
-   --     Last_Ex : Ada.Exceptions.Exception_Occurrence;
-   --  begin
-   --
-   --     if Radar_Task_Control.Exception_Occurred then
-   --        Radar_Task_Control.Last_Exception (Last_Ex);
-   --
-   --        declare
-   --           Failure_Result : constant BIT_Result_Type :=
-   --             (Result => Fail,
-   --              Failure_Message => To_Unbounded_String
-   --                (Ada.Exceptions.Exception_Name (Last_Ex)));
-   --        begin
-   --           Radar_Task_Control.Set_CBIT (Failure_Result);
-   --        end;
-   --     else
-   --        Radar_Task_Control.Set_CBIT (Pass_BIT_State);
-   --     end if;
-   --  end CBIT;
 
 end Radar_Subsystem;
