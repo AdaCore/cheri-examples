@@ -39,8 +39,7 @@ package body Countermeasures_Subsystem is
       -- Wait_Deploy --
       -----------------
 
-      entry Wait_Deploy
-      when Deploy_Requested is
+      entry Wait_Deploy when Deploy_Requested is
       begin
          Deploy_Requested := False;
          Status           := Deployed;
@@ -97,5 +96,30 @@ package body Countermeasures_Subsystem is
          Countermeasures_Control.Make_Ready;
       end loop;
    end Simulate_Countermeasures;
+
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+
+      Countermeasures_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 5.0;
+
+      Countermeasures_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Countermeasures_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
 
 end Countermeasures_Subsystem;

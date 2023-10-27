@@ -42,8 +42,14 @@ private
 
    procedure Simulate_Targeting;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Targeting_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Targeting'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func       => CBIT'Access,
       Control   => Targeting_Task_Control'Access,
       Priority  => System.Priority'Last);
 

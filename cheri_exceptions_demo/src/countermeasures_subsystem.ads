@@ -38,8 +38,14 @@ private
 
    procedure Simulate_Countermeasures;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Countermeasures_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Countermeasures'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Countermeasures_Task_Control'Access,
       Priority  => System.Priority'Last);
 

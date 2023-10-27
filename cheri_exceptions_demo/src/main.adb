@@ -12,8 +12,6 @@ with Display;
 with Radar_Subsystem;
 with Stores_Subsystem;
 
-pragma Unreferenced (Display);
-
 --  The environment task is responsible for handling input command key presses
 
 procedure Main with
@@ -28,6 +26,7 @@ is
 
 begin
    loop
+
       Ada.Text_IO.Get (C);
 
       case C is
@@ -45,6 +44,15 @@ begin
 
          when 'd' | 'D' =>
             Countermeasures_Subsystem.Countermeasures_Control.Deploy;
+
+         when 'f' | 'F' =>
+            Display.Show_Flight_Recorder_Screen;
+
+         when 'm' | 'M' =>
+            Display.Show_Main_Avioics_Screen;
+
+         when 'x' | 'X' =>
+            exit;
 
          when others =>
             null;

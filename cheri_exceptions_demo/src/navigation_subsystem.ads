@@ -48,8 +48,14 @@ private
 
    procedure Simulate_Navigation_Data;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Navigation_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Navigation_Data'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Navigation_Task_Control'Access,
       Priority  => System.Priority'Last);
 

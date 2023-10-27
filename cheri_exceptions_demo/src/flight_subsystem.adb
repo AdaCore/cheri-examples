@@ -41,4 +41,29 @@ package body Flight_Subsystem is
       end loop;
    end Simulate_Flight_Data;
 
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+
+      Flight_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 6.0;
+
+      Flight_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Flight_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
+
 end Flight_Subsystem;

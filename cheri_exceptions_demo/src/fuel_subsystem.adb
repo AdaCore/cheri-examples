@@ -132,4 +132,29 @@ package body Fuel_Subsystem is
          raise;
    end Simulate_Fuel_Data;
 
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+
+      Fuel_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 3.0;
+
+      Fuel_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Fuel_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
+
 end Fuel_Subsystem;

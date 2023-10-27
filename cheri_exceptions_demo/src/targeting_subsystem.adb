@@ -57,4 +57,28 @@ package body Targeting_Subsystem is
       end loop;
    end Simulate_Targeting;
 
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+      Targeting_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 7.0;
+
+      Targeting_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Targeting_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
+
 end Targeting_Subsystem;

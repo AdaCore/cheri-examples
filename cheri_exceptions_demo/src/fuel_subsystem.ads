@@ -62,8 +62,14 @@ private
 
    procedure Simulate_Fuel_Data;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Fuel_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Fuel_Data'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Fuel_Task_Control'Access,
       Priority  => System.Priority'Last);
 

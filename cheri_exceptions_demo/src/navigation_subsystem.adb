@@ -139,13 +139,39 @@ package body Navigation_Subsystem is
       New_Pos.Lat := Latitude (To_Degrees (Arcsin (Sin (Lat_Rads) * Cos (D)
         + Cos (Lat_Rads) * Sin (D) * Cos (Heading_Rads))));
 
-      New_Pos.Long := Longitude (To_Degrees (Long_Rads
-        + Arctan
+      New_Pos.Long := Longitude
+        (To_Degrees (Long_Rads
+         + Arctan
            (Sin (Heading_Rads) * Sin (D) * Cos (Lat_Rads),
             Cos (D) - Sin (Lat_Rads) * Sin (To_Radians (Float (New_Pos.Lat))))
         ));
 
       return New_Pos;
    end Update_Position;
+
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+
+      Navigation_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 5.0;
+
+      Navigation_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Navigation_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
 
 end Navigation_Subsystem;

@@ -38,8 +38,14 @@ private
 
    procedure Simulate_Flight_Data;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Flight_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Flight_Data'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Flight_Task_Control'Access,
       Priority  => System.Priority'Last);
 

@@ -3,6 +3,10 @@
 --
 --  SPDX-License-Identifier: Apache-2.0
 --
+
+--  with Ada.Exceptions;
+--  with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 package body Radar_Subsystem is
 
    ----------------
@@ -117,6 +121,7 @@ package body Radar_Subsystem is
             T        : Track with Import, Address => Raw_Data'Address;
 
          begin
+
             --  Assign an ID to this track. This triggers a CHERI capability
             --  bounds fault when Raw_Data is too small.
 
@@ -133,5 +138,50 @@ package body Radar_Subsystem is
          Radar_Data.Clear_Tracks;
          raise;
    end Simulate_Radar;
+
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+      use Monitored_Tasking;
+   begin
+      Radar_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 2.0;
+
+      Radar_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+      use Monitored_Tasking;
+   begin
+      Radar_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
+
+   --
+   --     use Monitored_Tasking;
+   --     Last_Ex : Ada.Exceptions.Exception_Occurrence;
+   --  begin
+   --
+   --     if Radar_Task_Control.Exception_Occurred then
+   --        Radar_Task_Control.Last_Exception (Last_Ex);
+   --
+   --        declare
+   --           Failure_Result : constant BIT_Result_Type :=
+   --             (Result => Fail,
+   --              Failure_Message => To_Unbounded_String
+   --                (Ada.Exceptions.Exception_Name (Last_Ex)));
+   --        begin
+   --           Radar_Task_Control.Set_CBIT (Failure_Result);
+   --        end;
+   --     else
+   --        Radar_Task_Control.Set_CBIT (Pass_BIT_State);
+   --     end if;
+   --  end CBIT;
 
 end Radar_Subsystem;

@@ -108,4 +108,22 @@ package body Stores_Subsystem is
       end loop;
    end Simulate_Stores;
 
+   ----------
+   -- PBIT --
+   ----------
+
+   procedure PBIT is
+   begin
+      Stores_Task_Control.Set_PBIT (Pass_BIT_State);
+   end PBIT;
+
+   ----------
+   -- CBIT --
+   ----------
+
+   procedure CBIT is
+   begin
+      Stores_Task_Control.Set_CBIT (Pass_BIT_State);
+   end CBIT;
+
 end Stores_Subsystem;

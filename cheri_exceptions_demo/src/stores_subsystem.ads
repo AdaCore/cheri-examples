@@ -65,8 +65,14 @@ private
 
    procedure Simulate_Stores;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Stores_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Stores'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Stores_Task_Control'Access,
       Priority  => System.Priority'Last);
 

@@ -103,8 +103,14 @@ private
 
    procedure Simulate_Radar;
 
+   procedure PBIT;
+
+   procedure CBIT;
+
    Radar_Task : Monitored_Tasking.Monitored_Task
      (Task_Body => Simulate_Radar'Access,
+      PBIT_Func      => PBIT'Access,
+      CBIT_Func      => CBIT'Access,
       Control   => Radar_Task_Control'Access,
       Priority  => System.Priority'Last);
 
