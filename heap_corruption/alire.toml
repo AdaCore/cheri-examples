@@ -1,0 +1,9 @@
+name = "heap_corruption"
+description = "Demonstrator of a heap corruption on morello using the GOT"
+version = "0.1.0-dev"
+
+authors = ["Johannes Kliemann"]
+maintainers = ["Johannes Kliemann <kliemann@adacore.com>"]
+maintainers-logins = ["jklmnn"]
+
+executables = ["heap_corruption"]
