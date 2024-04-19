@@ -7,11 +7,12 @@ project Heap_Corruption is
    for Exec_Dir use "bin";
    for Main use ("heap_corruption.adb");
    for Languages use ("Ada", "C");
-   for Target use "aarch64-elf";
+   for Target use "morello-elf";
    for Runtime ("Ada") use "light-morello-semihosting";
 
    package Compiler is
       for Default_Switches ("Ada") use Heap_Corruption_Config.Ada_Compiler_Switches;
+      for Default_Switches ("C") use ("-Og", "-g");
    end Compiler;
 
    package Binder is
@@ -21,5 +22,9 @@ project Heap_Corruption is
    package Install is
       for Artifacts (".") use ("share");
    end Install;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-Xlinker", "-Map=out.map");
+   end Linker;
 
 end Heap_Corruption;

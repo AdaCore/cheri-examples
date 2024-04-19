@@ -1,3 +1,9 @@
+--
+--  Copyright (C) 2020-2022, AdaCore
+--
+--  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+--
+
 with Ada.Text_IO;
 
 procedure Heap_Corruption
@@ -7,7 +13,7 @@ is
       Import,
       Convention => C,
       External_Name => "malicious_lib";
-   Data : String_Access := new String'("blubb");
+   Data : constant String_Access := new String'("Hello");
 begin
    Ada.Text_IO.Put_Line ("Data: " & Data.all);
    Malicious_Lib;
