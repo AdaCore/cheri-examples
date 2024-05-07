@@ -18,11 +18,11 @@
 with Ada.Text_IO;
 with System;
 with System.Storage_Elements; use System.Storage_Elements;
-
 with Countermeasures_Subsystem;
-with Display;
 with Radar_Subsystem;
 with Stores_Subsystem;
+with Display; use Display;
+with Splash_Screen;
 
 --  The environment task is responsible for handling input command key presses
 
@@ -32,7 +32,7 @@ is
    C : Character;
 
    Good_Buffer : constant Storage_Array (1 .. Radar_Subsystem.Raw_Data_Size) :=
-                   (others => 0);
+     (others => 0);
 
    Bad_Buffer  : constant Storage_Array (1 .. 8) := (others => 0);
 
@@ -41,8 +41,13 @@ begin
    loop
 
       Ada.Text_IO.Get (C);
+      Splash_Screen.Key_Press;
 
-      case C is
+      if Display.Get_Current_Screen = Main_Splash_Screen then
+         Display.Show_Main_Avionics_Screen;
+      else
+
+         case C is
          when 'a' | 'A' =>
             Radar_Subsystem.Radar_Control.Process_Radar_Data (Good_Buffer);
 
@@ -68,13 +73,11 @@ begin
             Display.Show_Flight_Recorder_Screen;
 
          when 'm' | 'M' =>
-            Display.Show_Main_Avioics_Screen;
-
-         when 'x' | 'X' =>
-            exit;
+            Display.Show_Main_Avionics_Screen;
 
          when others =>
             null;
-      end case;
+         end case;
+      end if;
    end loop;
 end Main;

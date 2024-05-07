@@ -144,11 +144,11 @@ package body Radar_Subsystem is
 
    procedure Simulate_Radar is
       Next_ID : Track_ID := 0;
-
    begin
       Radar_Data.Set_Operational (True);
 
       loop
+
          Radar_Control.Wait_Data_Ready;
 
          declare

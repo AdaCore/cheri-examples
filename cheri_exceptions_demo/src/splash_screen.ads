@@ -15,53 +15,36 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Real_Time;
+with Ada.Real_Time.Timing_Events; use Ada.Real_Time.Timing_Events;
+with Ada.Real_Time;               use Ada.Real_Time;
 with System;
+with Common_Terminal_Controls; use Common_Terminal_Controls;
 
-package Display is
+package Splash_Screen is
 
-   type Requested_Display_Type is
-     (Main_Splash_Screen, Main_Avionics_Screen, Flight_Recorder_Screen);
+   procedure Display_Splash_Screen;
+   --  Launch the splash screen
 
-   procedure Show_Main_Avionics_Screen;
+   procedure Display_Dynamic_Splash_Screen;
+   --  Animate the screen
 
-   procedure Show_Flight_Recorder_Screen;
-
-   procedure Show_Splash_Screen_Screen;
-
-   function Get_Current_Screen return Requested_Display_Type;
-
-   procedure Increase_Refresh;
-
-   procedure Decrease_Refresh;
-
-   task Display_Task;
+   procedure Key_Press;
+   --  Notification that a key has been pressed
 
 private
 
-   Start_Time : Ada.Real_Time.Time := Ada.Real_Time.Clock;
+   Allowed_Idle_Timing_Event : Timing_Event;
+   Allowed_Idle_Time    : constant Time_Span := Milliseconds (120_000);
+   Animate_Time         : constant Time_Span := Milliseconds (5_000);
+   Time_To_Next_Animate : Time;
+   Colour_1 : Text_Colour := White;
+   Colour_2 : Text_Colour := Yellow;
 
-   protected Display_Control_Data with
-     Priority => System.Interrupt_Priority'Last is
+   protected Protected_Timer_Event with
+     Priority => System.Interrupt_Priority'Last
+   is
+      procedure Idle_Timer_Fired (Event : in out Timing_Event);
 
-      procedure Show_Main_Avioics_Screen;
+   end Protected_Timer_Event;
 
-      procedure Show_Flight_Recorder_Screen;
-
-      procedure Show_Splash_Screen;
-
-      function Get_Requested_Display return Requested_Display_Type;
-
-      procedure Set_Current_Display (Display : Requested_Display_Type);
-
-      function Get_Current_Display return Requested_Display_Type;
-
-   private
-
-      Requested_Display : Requested_Display_Type := Main_Splash_Screen;
-      Current_Display   : Requested_Display_Type := Main_Avionics_Screen;
-      --  Make the initial displays different to force the initial page refresh
-
-   end Display_Control_Data;
-
-end Display;
+end Splash_Screen;

@@ -17,6 +17,10 @@
 
 package body Monitored_Tasking is
 
+   ------------------
+   -- Task_Control --
+   ------------------
+
    protected body Task_Control is
 
       ------------------------

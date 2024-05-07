@@ -16,6 +16,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Real_Time; use Ada.Real_Time;
+with Stores_Subsystem;
 
 package body Targeting_Subsystem is
 
@@ -58,6 +59,21 @@ package body Targeting_Subsystem is
          Targets (1 .. Count) := List;
       end Set_Targets;
 
+      ------------------
+      -- Set_Degraded --
+      ------------------
+
+      procedure Set_Degraded (Value : Boolean) is
+      begin
+         Degraded := Value;
+      end Set_Degraded;
+
+      ------------------
+      -- Get_Degraded --
+      ------------------
+
+      function Get_Degraded return Boolean is (Degraded);
+
    end Targeting_Data;
 
    ------------------------
@@ -66,10 +82,21 @@ package body Targeting_Subsystem is
 
    procedure Simulate_Targeting is
       use type Radar_Subsystem.Track_ID;
+      use type Monitored_Tasking.Task_Status_Kind;
 
       Next_Time : Time := Clock;
    begin
       loop
+
+         --  Check if we are recovering from being degraded
+         if Targeting_Data.Get_Degraded and then
+           Targeting_Task_Control.Get_Status = Monitored_Tasking.Normal
+         then
+            Targeting_Data.Set_Degraded (False);
+            Stores_Subsystem.Stores_Data.Targetting_System_State_Change
+              (Monitored_Tasking.Normal);
+         end if;
+
          if Radar_Subsystem.Radar_Data.Is_Operational then
             Targeting_Task_Control.Set_Status (Monitored_Tasking.Normal);
 
@@ -93,6 +120,9 @@ package body Targeting_Subsystem is
          else
             Targeting_Task_Control.Set_Status (Monitored_Tasking.Degraded);
             Targeting_Data.Set_Targets (Empty_Target_List);
+            Targeting_Data.Set_Degraded (True);
+            Stores_Subsystem.Stores_Data.Targetting_System_State_Change
+              (Monitored_Tasking.Degraded);
          end if;
 
          Next_Time := Next_Time + Update_Period;
