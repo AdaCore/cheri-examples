@@ -7,7 +7,7 @@ project Demo is
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "bin";
    for Main use ("main.adb");
-   for Target use "aarch64-elf";
+   for Target use "morello-elf";
    for Runtime ("ada") use "embedded-morello";
 
    package Compiler is

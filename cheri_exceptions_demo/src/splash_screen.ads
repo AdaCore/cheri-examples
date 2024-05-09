@@ -15,55 +15,36 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Real_Time.Timing_Events; use Ada.Real_Time.Timing_Events;
+with Ada.Real_Time;               use Ada.Real_Time;
 with System;
-with Monitored_Tasking;
+with Common_Terminal_Controls; use Common_Terminal_Controls;
 
---  This subsystem implements a task to simulate the concept of "cyber
---  resilience" countermeasures. For the purposes of this demo this involves
---  resetting any task that is in a "compromised" state to return that task
---  to normal operation.
+package Splash_Screen is
 
-package Countermeasures_Subsystem is
+   procedure Display_Splash_Screen;
+   --  Launch the splash screen
 
-   type Status_Kind is (Ready, Deployed);
+   procedure Display_Dynamic_Splash_Screen;
+   --  Animate the screen
 
-   protected Countermeasures_Control is
-
-      procedure Get_Status_Change (Change : out Boolean);
-
-      function Get_Status return Status_Kind;
-
-      procedure Deploy;
-
-      entry Wait_Deploy;
-
-      procedure Make_Ready;
-
-      procedure Reset;
-
-   private
-
-      Deploy_Requested : Boolean     := False;
-      Status           : Status_Kind := Ready;
-      Status_Change    : Boolean     := True;
-
-   end Countermeasures_Control;
-
-   Countermeasures_Task_Control : aliased Monitored_Tasking.Task_Control;
+   procedure Key_Press;
+   --  Notification that a key has been pressed
 
 private
 
-   procedure Simulate_Countermeasures;
+   Allowed_Idle_Timing_Event : Timing_Event;
+   Allowed_Idle_Time    : constant Time_Span := Milliseconds (120_000);
+   Animate_Time         : constant Time_Span := Milliseconds (5_000);
+   Time_To_Next_Animate : Time;
+   Colour_1 : Text_Colour := White;
+   Colour_2 : Text_Colour := Yellow;
 
-   procedure PBIT;
+   protected Protected_Timer_Event with
+     Priority => System.Interrupt_Priority'Last
+   is
+      procedure Idle_Timer_Fired (Event : in out Timing_Event);
 
-   procedure CBIT;
+   end Protected_Timer_Event;
 
-   Countermeasures_Task : Monitored_Tasking.Monitored_Task
-     (Task_Body => Simulate_Countermeasures'Access,
-      PBIT_Func      => PBIT'Access,
-      CBIT_Func      => CBIT'Access,
-      Control   => Countermeasures_Task_Control'Access,
-      Priority  => System.Priority'Last);
-
-end Countermeasures_Subsystem;
+end Splash_Screen;

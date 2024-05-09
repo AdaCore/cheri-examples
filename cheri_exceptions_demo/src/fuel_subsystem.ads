@@ -32,6 +32,8 @@ package Fuel_Subsystem is
    type Kilograms_Per_Second is delta 0.001 range 0.0 .. 999_999.999 with
      Small => 0.001;
 
+   Initial_FQI_Value : constant Kilograms := 2_400.0;
+
    protected Fuel_Data is
 
       function Fuel_Quantity_Available return Boolean;
@@ -64,9 +66,11 @@ package Fuel_Subsystem is
       procedure Set_Time_To_Minimum_Fuel (Value : Duration);
       --  Set the time to minimum fuel value and mark it as valid
 
+      procedure Reset;
+
    private
 
-      FQI_Value   : Kilograms := 2_400.0;
+      FQI_Value   : Kilograms := Initial_FQI_Value;
       FQI_Valid   : Boolean   := True;
       FQI_Changed : Boolean   := True;
 

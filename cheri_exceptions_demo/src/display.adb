@@ -15,7 +15,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 with Ada.Real_Time;          use Ada.Real_Time;
 with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -30,6 +29,8 @@ with Stores_Subsystem;          use Stores_Subsystem;
 with Targeting_Subsystem;
 with Built_In_Test_Subsystem;
 use Built_In_Test_Subsystem;
+with Common_Terminal_Controls; use Common_Terminal_Controls;
+with Splash_Screen;
 
 package body Display is
 
@@ -38,14 +39,14 @@ package body Display is
    Update_Period_Integer : Integer := 500;
    Update_Period         : Time_Span := Milliseconds (Update_Period_Integer);
 
-   ------------------------------
-   -- Show_Main_Avioics_Screen --
-   ------------------------------
+   -------------------------------
+   -- Show_Main_Avionics_Screen --
+   -------------------------------
 
-   procedure Show_Main_Avioics_Screen is
+   procedure Show_Main_Avionics_Screen is
    begin
       Display_Control_Data.Show_Main_Avioics_Screen;
-   end Show_Main_Avioics_Screen;
+   end Show_Main_Avionics_Screen;
 
    ---------------------------------
    -- Show_Flight_Recorder_Screen --
@@ -55,6 +56,18 @@ package body Display is
    begin
       Display_Control_Data.Show_Flight_Recorder_Screen;
    end Show_Flight_Recorder_Screen;
+
+   -------------------------------
+   -- Show_Splash_Screen_Screen --
+   -------------------------------
+
+   procedure Show_Splash_Screen_Screen is
+   begin
+      Display_Control_Data.Show_Splash_Screen;
+   end Show_Splash_Screen_Screen;
+
+   function Get_Current_Screen return Requested_Display_Type is
+     (Display_Control_Data.Get_Current_Display);
 
    ----------------------
    -- Increase_Refresh --
@@ -86,25 +99,10 @@ package body Display is
       Update_Period := Milliseconds (Update_Period_Integer);
    end Decrease_Refresh;
 
-   procedure Clear;
-   --  Clear the terminal
-
-   procedure Home;
-   --  Move the cursor to the home position (top left)
-
-   procedure Move_Cursor_To (X, Y : Natural);
-   --  Move the cursor to a position on the screen. (0, 0) is top left
-
-   type Text_Colour is
-     (Default, Green, Red, Yellow, Blue, Magenta, Cyan, White);
-
-   procedure Set_Text_Colour (Colour : Text_Colour);
-   --  Set the colour of the text
-
    Task_Status_Colour : constant
      array (Monitored_Tasking.Task_Status_Kind)
      of Text_Colour :=
-       (PBIT => Yellow,
+       (PBIT             => Yellow,
         Normal           => Green,
         Degraded         => Yellow,
         Compromised      => Red,
@@ -186,9 +184,6 @@ package body Display is
 
    --  Screen coordinates of the UI elements. (0, 0) is the top-left.
 
-   Splash_Screen_X : constant := 2;
-   Splash_Screen_Y : constant := 5;
-
    Countermeasures_X       : constant := 26;
    Countermeasures_Y       : constant := 0;
    Countermeasures_RSide_X : constant := 56;
@@ -243,78 +238,6 @@ package body Display is
    Flight_Recorder_His_CBIT_X : constant := 0;
    Flight_Recorder_His_CBIT_Y : constant := 16;
 
-   -----------
-   -- Clear --
-   -----------
-
-   procedure Clear is
-   begin
-      Put (ESC & "[2J");
-   end Clear;
-
-   ----------
-   -- Home --
-   ----------
-
-   procedure Home is
-   begin
-      Put (ESC & "[H");
-   end Home;
-
-   --------------------
-   -- Move_Cursor_To --
-   --------------------
-
-   procedure Move_Cursor_To (X, Y : Natural) is
-      X_Str : constant String := X'Image;
-      Y_Str : constant String := Y'Image;
-   begin
-      Home;
-
-      if X > 0 then
-         Put (ESC & "[" & X_Str (2 .. X_Str'Last) & "C");
-      end if;
-
-      if Y > 0 then
-         Put (ESC & "[" & Y_Str (2 .. Y_Str'Last) & "B");
-      end if;
-   end Move_Cursor_To;
-
-   ---------------------
-   -- Set_Text_Colour --
-   ---------------------
-
-   procedure Set_Text_Colour (Colour : Text_Colour) is
-   begin
-
-      case Colour is
-         when Default =>
-            Put (ESC & "[0m");
-
-         when Red =>
-            Put (ESC & "[31m");
-
-         when Green =>
-            Put (ESC & "[32m");
-
-         when Yellow =>
-            Put (ESC & "[33m");
-
-         when Blue =>
-            Put (ESC & "[34m");
-
-         when Magenta =>
-            Put (ESC & "[35m");
-
-         when Cyan =>
-            Put (ESC & "[36m");
-
-         when White =>
-            Put (ESC & "[37m");
-
-      end case;
-   end Set_Text_Colour;
-
    -----------------------
    -- Put_Ada_Core_Name --
    -----------------------
@@ -343,71 +266,6 @@ package body Display is
       Set_Text_Colour (Default);
       pragma Style_Checks (On);
    end Put_AdaCore_Logo;
-
-   -------------------
-   -- Splash_Screen --
-   -------------------
-
-   procedure Splash_Screen
-   is
-
-      Rolling_Splash_Screen_Y : Integer := Splash_Screen_Y;
-
-      -----------------
-      -- Put_Rolling --
-      -----------------
-
-      procedure Put_Rolling (Output : String) is
-      begin
-         Move_Cursor_To (Splash_Screen_X, Rolling_Splash_Screen_Y);
-         Put (Output);
-         Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      end Put_Rolling;
-   begin
-
-      pragma Style_Checks (Off);
-      Put_Rolling ("╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮");
-      Put_Rolling ("│                 ██                 ██                    ██████                                               │  ");
-      Put_Rolling ("│                ████                ██                  ██      █                                              │  ");
-      Put_Rolling ("│               ██  ██               ██                ██                                                       │  ");
-      Put_Rolling ("│              ██    ██      ██████████   ████████    ██              ████████    ██ ████  ████████             │  ");
-      Put_Rolling ("│              ██    ██     ██       ██          ██  ██             ███      ███  ████    ██      ██            │  ");
-      Put_Rolling ("│             ██      ██   ██        ██     ███   ██ ██            ███        ███ ██     ██   ███████           │  ");
-      Put_Rolling ("│            ██   ███████  ██        ██   ███     ██  ██           ███        ███ ██     ██                     │  ");
-      Put_Rolling ("│            ██        ██   ██       ██  ██      ███   ██        █  ███      ███  ██     ███      ██            │  ");
-      Put_Rolling ("│           ██          ██   ██████████   ███████ ██    █████████     ████████    ██      █████████             │  ");
-      Put_Rolling ("╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────╯");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Set_Text_Colour (Yellow);
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Put_Rolling ("                            ✈  Ｅｄｇｅ Ａｖｉｏｎｉｃｓ Ｄｅｍｏｎｓｔｒａｔｏｒ  ✈");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Put_Rolling ("         ✈  ＣＨＥＲＩ ＰｕｒｅーＣａｐａｂｉｌｉｔｙ ＢａｒｅーＭｅｔａｌ Ａｄａ ＲｕｎーＴｉｍｅ  ✈");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Put_Rolling ("                              ✈  Ｅｘｅｃｕｔｉｎｇ Ｏｎ Ａｒｍ Ｍｏｒｅｌｌｏ  ✈");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Put_Rolling ("         ✈  ＣＨＥＲＩ Ｆａｕｌｔ Ｐｒｏｐａｇａｔｉｏｎ ｔｏ Ａｄａ Ｅｘｃｅｐｔｉｏｎ Ｈａｎｄｌｅｒｓ  ✈");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Set_Text_Colour (Default);
-      Set_Text_Colour (Default);
-      Put_Rolling ("                                             𝗔𝗱𝗮𝗖𝗼𝗿𝗲  ② ⓪ ② ④");
-      Put_Rolling ("──────────────────────────────────────────────────────────────────────────────────────────────────────────────");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Set_Text_Colour (Green);
-      Put_Rolling ("                                         𝘗𝘳𝘦𝘴𝘴 𝘢𝘯𝘺 𝘬𝘦𝘺 𝘵𝘰 𝘤𝘰𝘯𝘵𝘪𝘯𝘶𝘦                                           ");
-      Set_Text_Colour (Default);
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Put_Rolling ("──────────────────────────────────────────────────────────────────────────────────────────────────────────────");
-      Rolling_Splash_Screen_Y := Rolling_Splash_Screen_Y + 1;
-      Set_Text_Colour (White);
-      Put_Rolling ("                                              🅓 ⓘ ⓖ ⓘ ⓣ ⓐ ⓛ");
-      Put_Rolling ("                                              🅢 ⓔ ⓒ ⓤ ⓡ ⓘ ⓣ ⓨ");
-      Put_Rolling ("                                              🅑 ⓨ");
-      Put_Rolling ("                                              🅓 ⓔ ⓢ ⓘ ⓖ ⓝ");
-      Put_Rolling ("                                                                                                              ");
-      pragma Style_Checks (On);
-
-   end Splash_Screen;
 
    ---------------------------
    -- Put_Radar_Data_Static --
@@ -470,6 +328,8 @@ package body Display is
       --  Update the screen if the tracks have changed and
       Radar_Subsystem.Radar_Data.Have_Tracks_Changed (Tracks_Changed);
       if Tracks_Changed or Force_Refresh then
+         Move_Cursor_To (Radar_X + 9, Radar_Y + 4);
+         Put ("               ");
          Move_Cursor_To (Radar_X + 9, Radar_Y + 4);
          Put (Radar_Subsystem.Radar_Data.Tracks'Length'Image);
       end if;
@@ -1213,7 +1073,7 @@ package body Display is
    procedure Put_Commands is
    begin
 
-      if Display_Control_Data.Get_Requested_Display = Main_Avioics_Screen then
+      if Display_Control_Data.Get_Requested_Display = Main_Avionics_Screen then
          Move_Cursor_To
            (Commands_Main_Screen_X_Left,
             Commands_Main_Screen_Y_Left);
@@ -1246,7 +1106,8 @@ package body Display is
            (Commands_Main_Screen_X_Right,
             Commands_Main_Screen_Y_Right + 3);
 
-         Put_Line (" 🆇 ーExit");
+         Put_Line (" 🆂 ーShow splash screen");
+
       else
          Move_Cursor_To
            (Commands_Flight_Recorder_Screen_X,
@@ -1254,7 +1115,6 @@ package body Display is
 
          Put_Line ("Key commands:");
          Put_Line (" 🅼 ーDisplay main avionics screen");
-         Put_Line (" 🆇 ーExit");
       end if;
    end Put_Commands;
 
@@ -1358,7 +1218,7 @@ package body Display is
 
    task body Display_Task is
       Next_Time : Time := Clock;
-      Continue : Character;
+      IGNORE_Continue : Character;
 
       -----------------------------------------
       -- Display_Static_Main_Screen_Elements --
@@ -1391,20 +1251,17 @@ package body Display is
          Put_Commands;
          Ada.Text_IO.New_Line;
       end Display_Static_Flight_Recorder_Screen_Elements;
+
    begin
 
+      --  Switch off the cursor and clear the screen
+      Hide_Cursor;
       Clear;
-      Display.Splash_Screen;
-      Ada.Text_IO.Get (Continue);
-
-      --  Display the static elements of the main screen
-      Display_Static_Main_Screen_Elements;
-      Display_Control_Data.Set_Current_Display (Main_Avioics_Screen);
 
       loop
 
          declare
-         --  Check if we need to switch displays
+            --  Check if we need to switch displays
             Page_Switch : constant Boolean :=
               Display_Control_Data.Get_Requested_Display /=
                 Display_Control_Data.Get_Current_Display;
@@ -1415,36 +1272,48 @@ package body Display is
                Display_Control_Data.Set_Current_Display
                  (Display_Control_Data.Get_Requested_Display);
 
-               if Display_Control_Data.Get_Current_Display =
-                 Main_Avioics_Screen
-               then
-                  --  Display the static elements of the main screen
-                  Display_Static_Main_Screen_Elements;
-               else
-                  --  Display the static elements of the flight recorder screen
-                  Display_Static_Flight_Recorder_Screen_Elements;
-               end if;
+               case Display_Control_Data.Get_Current_Display is
+                  when Main_Avionics_Screen =>
+
+                     --  Display the static elements of the main screen
+                     Display_Static_Main_Screen_Elements;
+
+                  when Flight_Recorder_Screen =>
+                     --  Display the static elements of the flight recorder
+                     --  screen
+                     Display_Static_Flight_Recorder_Screen_Elements;
+
+                  when Main_Splash_Screen =>
+                     --  Display the splash screen
+                     Splash_Screen.Display_Splash_Screen;
+               end case;
             end if;
 
             --  Now display the dynamic elements
-            if Display_Control_Data.Get_Current_Display = Main_Avioics_Screen
-            then
+            case Display_Control_Data.Get_Current_Display is
+               when Main_Avionics_Screen =>
 
-               --  Now update the dynamic elements
-               Put_Countermeasures_Data_Dynamic (Page_Switch);
-               Put_Radar_Data_Dynamic (Page_Switch);
-               Put_Flight_Data_Dynamic (Page_Switch);
-               Put_Fuel_Data_Dynamic (Page_Switch);
-               Put_Navigation_Data_Dynamic (Page_Switch);
-               Put_Targeting_Data_Dynamic (Page_Switch);
-               Put_Stores_Data_Dynamic (Page_Switch);
-               Put_Built_In_Test_Data_Dynamic (Page_Switch);
-               Ada.Text_IO.New_Line;
-            else
+                  --  Now update the dynamic elements
+                  Put_Countermeasures_Data_Dynamic (Page_Switch);
+                  Put_Radar_Data_Dynamic (Page_Switch);
+                  Put_Flight_Data_Dynamic (Page_Switch);
+                  Put_Fuel_Data_Dynamic (Page_Switch);
+                  Put_Navigation_Data_Dynamic (Page_Switch);
+                  Put_Targeting_Data_Dynamic (Page_Switch);
+                  Put_Stores_Data_Dynamic (Page_Switch);
+                  Put_Built_In_Test_Data_Dynamic (Page_Switch);
+                  Ada.Text_IO.New_Line;
 
-               --  Now update the dynamic elements
-               Put_Flight_Recorder_Information_Dynamic (Page_Switch);
-            end if;
+               when Flight_Recorder_Screen =>
+
+                  --  Now update the dynamic elements
+                  Put_Flight_Recorder_Information_Dynamic (Page_Switch);
+
+               when Main_Splash_Screen =>
+
+                  --  Animate the splash screen
+                  Splash_Screen.Display_Dynamic_Splash_Screen;
+            end case;
          end;
 
          Next_Time := Next_Time + Update_Period;
@@ -1458,13 +1327,13 @@ package body Display is
 
    protected body Display_Control_Data is
 
-      ------------------------------
-      -- Show_Main_Avioics_Screen --
-      ------------------------------
+      -------------------------------
+      -- Show_Main_Avionics_Screen --
+      -------------------------------
 
       procedure Show_Main_Avioics_Screen is
       begin
-         Requested_Display := Main_Avioics_Screen;
+         Requested_Display := Main_Avionics_Screen;
       end Show_Main_Avioics_Screen;
 
       ---------------------------------
@@ -1476,13 +1345,34 @@ package body Display is
          Requested_Display := Flight_Recorder_Screen;
       end Show_Flight_Recorder_Screen;
 
+      ------------------------
+      -- Show_Splash_Screen --
+      ------------------------
+
+      procedure Show_Splash_Screen is
+      begin
+         Requested_Display := Main_Splash_Screen;
+      end Show_Splash_Screen;
+
+      ---------------------------
+      -- Get_Requested_Display --
+      ---------------------------
+
       function Get_Requested_Display return Requested_Display_Type is
          (Requested_Display);
+
+      -------------------------
+      -- Set_Current_Display --
+      -------------------------
 
       procedure Set_Current_Display (Display : Requested_Display_Type) is
       begin
          Current_Display := Display;
       end Set_Current_Display;
+
+      -------------------------
+      -- Get_Current_Display --
+      -------------------------
 
       function Get_Current_Display return Requested_Display_Type is
          (Current_Display);

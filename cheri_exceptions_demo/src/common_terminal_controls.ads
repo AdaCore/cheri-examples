@@ -15,53 +15,24 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Real_Time;
-with System;
+package Common_Terminal_Controls is
 
-package Display is
+   procedure Move_Cursor_To (X, Y : Natural);
+   --  Move the cursor to a position on the screen. (0, 0) is top left
 
-   type Requested_Display_Type is
-     (Main_Splash_Screen, Main_Avionics_Screen, Flight_Recorder_Screen);
+   type Text_Colour is
+     (Default, Green, Red, Yellow, Blue, Magenta, Cyan, White);
+   
+   procedure Set_Text_Colour (Colour : Text_Colour);
+   --  Set the colour of the text
 
-   procedure Show_Main_Avionics_Screen;
+   procedure Hide_Cursor;
+   --  Hide the blinking cursor
+   
+   procedure Clear;
+   --  Clear the terminal
 
-   procedure Show_Flight_Recorder_Screen;
-
-   procedure Show_Splash_Screen_Screen;
-
-   function Get_Current_Screen return Requested_Display_Type;
-
-   procedure Increase_Refresh;
-
-   procedure Decrease_Refresh;
-
-   task Display_Task;
-
-private
-
-   Start_Time : Ada.Real_Time.Time := Ada.Real_Time.Clock;
-
-   protected Display_Control_Data with
-     Priority => System.Interrupt_Priority'Last is
-
-      procedure Show_Main_Avioics_Screen;
-
-      procedure Show_Flight_Recorder_Screen;
-
-      procedure Show_Splash_Screen;
-
-      function Get_Requested_Display return Requested_Display_Type;
-
-      procedure Set_Current_Display (Display : Requested_Display_Type);
-
-      function Get_Current_Display return Requested_Display_Type;
-
-   private
-
-      Requested_Display : Requested_Display_Type := Main_Splash_Screen;
-      Current_Display   : Requested_Display_Type := Main_Avionics_Screen;
-      --  Make the initial displays different to force the initial page refresh
-
-   end Display_Control_Data;
-
-end Display;
+   procedure Home;
+   --  Move the cursor to the home position (top left)
+   
+end Common_Terminal_Controls;

@@ -42,11 +42,18 @@ package Targeting_Subsystem is
 
       procedure Set_Targets (List : Target_List);
 
+      procedure Set_Degraded (Value : Boolean);
+
+      function Get_Degraded return Boolean;
+
+      procedure Reset;
+
    private
 
       Targets : Target_List (1 .. Radar_Subsystem.Max_Tracks) := (others => 0);
       Targets_Changed : Boolean := True;
       Count   : Radar_Subsystem.Track_Count := 0;
+      Degraded : Boolean := False;
 
    end Targeting_Data;
 

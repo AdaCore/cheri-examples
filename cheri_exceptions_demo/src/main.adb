@@ -18,11 +18,15 @@
 with Ada.Text_IO;
 with System;
 with System.Storage_Elements; use System.Storage_Elements;
-
 with Countermeasures_Subsystem;
-with Display;
+with Fuel_Subsystem;
+with Navigation_Subsystem;
 with Radar_Subsystem;
 with Stores_Subsystem;
+with Targeting_Subsystem;
+with Display; use Display;
+with Splash_Screen;
+with Monitored_Tasking; use Monitored_Tasking;
 
 --  The environment task is responsible for handling input command key presses
 
@@ -32,7 +36,7 @@ is
    C : Character;
 
    Good_Buffer : constant Storage_Array (1 .. Radar_Subsystem.Raw_Data_Size) :=
-                   (others => 0);
+     (others => 0);
 
    Bad_Buffer  : constant Storage_Array (1 .. 8) := (others => 0);
 
@@ -41,8 +45,27 @@ begin
    loop
 
       Ada.Text_IO.Get (C);
+      Splash_Screen.Key_Press;
 
-      case C is
+      if Display.Get_Current_Screen = Main_Splash_Screen then
+
+         --  Reset the demo state when transitioning off the splash screen
+
+         Countermeasures_Subsystem.Countermeasures_Control.Reset;
+         Fuel_Subsystem.Fuel_Data.Reset;
+         Navigation_Subsystem.Navigation_Data.Reset;
+         Radar_Subsystem.Radar_Data.Reset;
+         Stores_Subsystem.Stores_Data.Reset;
+         Targeting_Subsystem.Targeting_Data.Reset;
+
+         if Radar_Subsystem.Radar_Task_Control.Get_Status = Compromised then
+            Radar_Subsystem.Radar_Task_Control.Reset;
+         end if;
+
+         Display.Show_Main_Avionics_Screen;
+      else
+
+         case C is
          when 'a' | 'A' =>
             Radar_Subsystem.Radar_Control.Process_Radar_Data (Good_Buffer);
 
@@ -68,13 +91,14 @@ begin
             Display.Show_Flight_Recorder_Screen;
 
          when 'm' | 'M' =>
-            Display.Show_Main_Avioics_Screen;
+            Display.Show_Main_Avionics_Screen;
 
-         when 'x' | 'X' =>
-            exit;
+         when 's' | 'S' =>
+            Display.Show_Splash_Screen_Screen;
 
          when others =>
             null;
-      end case;
+         end case;
+      end if;
    end loop;
 end Main;

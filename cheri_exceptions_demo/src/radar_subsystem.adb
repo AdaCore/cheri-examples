@@ -95,6 +95,15 @@ package body Radar_Subsystem is
          Num_Tracks_Changed := True;
       end Clear_Tracks;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Clear_Tracks;
+      end Reset;
+
    end Radar_Data;
 
    -------------------
@@ -144,11 +153,11 @@ package body Radar_Subsystem is
 
    procedure Simulate_Radar is
       Next_ID : Track_ID := 0;
-
    begin
       Radar_Data.Set_Operational (True);
 
       loop
+
          Radar_Control.Wait_Data_Ready;
 
          declare

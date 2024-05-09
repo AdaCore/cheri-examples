@@ -18,7 +18,6 @@
 with Ada.Real_Time; use Ada.Real_Time;
 
 with Targeting_Subsystem;
-with Monitored_Tasking;    use Monitored_Tasking;
 
 package body Stores_Subsystem is
 
@@ -31,19 +30,14 @@ package body Stores_Subsystem is
       ------------------------------
 
       procedure Get_Light_Status_Changed
-        (Idx : Light_Index; Changed : out Boolean) is
+        (Idx : Light_Index; Changed : out Boolean)
+      is
       begin
-
-         if Targeting_Subsystem.Targeting_Task_Control.Get_Status /= Degraded
-         then
-            Changed := True;
+         if Light_Status_Changed (Idx) then
+            Changed                    := True;
+            Light_Status_Changed (Idx) := False;
          else
-            if Light_Status_Changed (Idx) then
-               Changed := True;
-               Light_Status_Changed (Idx) := False;
-            else
-               Changed := False;
-            end if;
+            Changed := False;
          end if;
       end Get_Light_Status_Changed;
 
@@ -52,26 +46,18 @@ package body Stores_Subsystem is
       ----------------------
 
       function Get_Light_Status (Idx : Light_Index) return Status_Kind is
-      begin
-         --  Light armaments require targeting data
-         if Targeting_Subsystem.Targeting_Task_Control.Get_Status = Normal then
-            return Light_Status (Idx);
-         elsif Light_Status (Idx) = Launched then
-            return Launched;
-         else
-            return Unavailable;
-         end if;
-      end Get_Light_Status;
+        (Light_Status (Idx));
 
       ------------------------------
       -- Get_Heavy_Status_Changed --
       ------------------------------
 
       procedure Get_Heavy_Status_Changed
-        (Idx : Heavy_Index; Changed : out Boolean) is
+        (Idx : Heavy_Index; Changed : out Boolean)
+      is
       begin
          if Heavy_Status_Changed (Idx) then
-            Changed := True;
+            Changed                    := True;
             Heavy_Status_Changed (Idx) := False;
          else
             Changed := False;
@@ -94,7 +80,7 @@ package body Stores_Subsystem is
          for Idx in Light_Index loop
             if Get_Light_Status (Idx) = Ready then
                Light_Status_Changed (Idx) := True;
-               Light_Status (Idx) := Launched;
+               Light_Status (Idx)         := Launched;
                exit;
             end if;
          end loop;
@@ -109,11 +95,51 @@ package body Stores_Subsystem is
          for Idx in Heavy_Index loop
             if Get_Heavy_Status (Idx) = Ready then
                Heavy_Status_Changed (Idx) := True;
-               Heavy_Status (Idx) := Launched;
+               Heavy_Status (Idx)         := Launched;
                exit;
             end if;
          end loop;
       end Launch_Heavy;
+
+      ------------------------------------
+      -- Targetting_System_State_Change --
+      ------------------------------------
+
+      procedure Targetting_System_State_Change (New_State : Task_Status_Kind)
+      is
+      begin
+         Targetting_System_State := New_State;
+
+         if Targetting_System_State = Degraded then
+
+            for J in Light_Status_Array'Range loop
+               if Light_Status (J) = Ready then
+                  Light_Status (J) := Unavailable;
+                  Light_Status_Changed (J) := True;
+               end if;
+            end loop;
+
+         elsif Targetting_System_State = Normal then
+            for J in Light_Status_Array'Range loop
+               if Light_Status (J) = Unavailable then
+                  Light_Status (J) := Ready;
+                  Light_Status_Changed (J) := True;
+               end if;
+            end loop;
+         end if;
+      end Targetting_System_State_Change;
+
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Light_Status         := (others => Ready);
+         Light_Status_Changed := (others => True);
+         Heavy_Status         := (others => Ready);
+         Heavy_Status_Changed := (others => True);
+      end Reset;
 
    end Stores_Data;
 
@@ -146,8 +172,7 @@ package body Stores_Subsystem is
       ------------------
 
       procedure Get_Requests
-        (Light_Requested : out Boolean;
-         Heavy_Requested : out Boolean)
+        (Light_Requested : out Boolean; Heavy_Requested : out Boolean)
       is
       begin
          Light_Requested := Launch_Light;
@@ -170,11 +195,13 @@ package body Stores_Subsystem is
       Heavy_Requested : Boolean;
    begin
       loop
-         if Targeting_Subsystem.Targeting_Task_Control.Get_Status /= Normal
-         then
-            Stores_Task_Control.Set_Status (Degraded);
-         else
-            Stores_Task_Control.Set_Status (Normal);
+         if Stores_Task_Control.Get_Status /= PBIT then
+            if Targeting_Subsystem.Targeting_Task_Control.Get_Status = Degraded
+            then
+               Stores_Task_Control.Set_Status (Degraded);
+            else
+               Stores_Task_Control.Set_Status (Normal);
+            end if;
          end if;
 
          Stores_Control.Get_Requests
@@ -200,6 +227,11 @@ package body Stores_Subsystem is
 
    procedure PBIT is
    begin
+
+      Stores_Task_Control.Set_PBIT (In_Progress_BIT_State);
+
+      delay 5.0;
+
       Stores_Task_Control.Set_PBIT (Pass_BIT_State);
    end PBIT;
 

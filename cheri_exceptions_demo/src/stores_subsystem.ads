@@ -16,7 +16,7 @@
 ------------------------------------------------------------------------------
 
 with System;
-with Monitored_Tasking;
+with Monitored_Tasking; use Monitored_Tasking;
 
 --  This subsystem implements a task to simulate aircraft armaments.
 --  For the purposes of this demo this involves simply tracking the status of
@@ -59,12 +59,19 @@ package Stores_Subsystem is
       procedure Launch_Heavy;
       --  Launch a heavy armament
 
+      procedure Targetting_System_State_Change (New_State : Task_Status_Kind);
+      --  Notification that the targetting system state has changed. Stores
+      --  and targetting are tightly coupled by design.
+
+      procedure Reset;
+
    private
 
-      Light_Status : Light_Status_Array := (others => Ready);
+      Light_Status : Light_Status_Array         := (others => Ready);
       Light_Status_Changed : Light_Status_Changed_Array := (others => True);
-      Heavy_Status : Heavy_Status_Array := (others => Ready);
+      Heavy_Status : Heavy_Status_Array         := (others => Ready);
       Heavy_Status_Changed : Heavy_Status_Changed_Array := (others => True);
+      Targetting_System_State : Task_Status_Kind := PBIT;
 
    end Stores_Data;
 
@@ -74,8 +81,7 @@ package Stores_Subsystem is
       procedure Request_Launch_Heavy;
 
       procedure Get_Requests
-        (Light_Requested : out Boolean;
-         Heavy_Requested : out Boolean);
+        (Light_Requested : out Boolean; Heavy_Requested : out Boolean);
 
    private
 
@@ -94,11 +100,10 @@ private
 
    procedure CBIT;
 
-   Stores_Task : Monitored_Tasking.Monitored_Task
-     (Task_Body => Simulate_Stores'Access,
-      PBIT_Func      => PBIT'Access,
-      CBIT_Func      => CBIT'Access,
-      Control   => Stores_Task_Control'Access,
-      Priority  => System.Priority'Last);
+   Stores_Task :
+     Monitored_Tasking.Monitored_Task
+       (Task_Body => Simulate_Stores'Access, PBIT_Func => PBIT'Access,
+        CBIT_Func => CBIT'Access, Control => Stores_Task_Control'Access,
+        Priority  => System.Priority'Last);
 
 end Stores_Subsystem;

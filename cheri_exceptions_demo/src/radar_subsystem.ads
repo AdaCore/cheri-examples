@@ -49,7 +49,7 @@ package Radar_Subsystem is
       ID       : Track_ID   := 0;
    end record;
 
-   Max_Tracks : constant := 10;
+   Max_Tracks : constant := 100;
 
    subtype Track_Count is Natural range 0 .. Max_Tracks;
 
@@ -76,6 +76,8 @@ package Radar_Subsystem is
       procedure Add_Track (T : Track);
 
       procedure Clear_Tracks;
+
+      procedure Reset;
 
    private
 
