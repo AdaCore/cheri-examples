@@ -133,6 +133,16 @@ package body Navigation_Subsystem is
          Current_Heading := Heading;
       end Set_Heading;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Set_Position (Simulated_Position);
+         Set_Heading (Simulated_Heading);
+      end Reset;
+
    end Navigation_Data;
 
    ------------------------------
@@ -145,8 +155,7 @@ package body Navigation_Subsystem is
       Next_Time : Time := Clock;
 
    begin
-      Navigation_Data.Set_Position (Simulated_Position);
-      Navigation_Data.Set_Heading (Simulated_Heading);
+      Navigation_Data.Reset;
 
       loop
          --  Update the position based on the current speed and heading.

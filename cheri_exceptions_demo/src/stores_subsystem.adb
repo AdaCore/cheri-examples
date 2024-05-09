@@ -129,6 +129,18 @@ package body Stores_Subsystem is
          end if;
       end Targetting_System_State_Change;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Light_Status         := (others => Ready);
+         Light_Status_Changed := (others => True);
+         Heavy_Status         := (others => Ready);
+         Heavy_Status_Changed := (others => True);
+      end Reset;
+
    end Stores_Data;
 
    --------------------

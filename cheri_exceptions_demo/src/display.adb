@@ -1102,6 +1102,12 @@ package body Display is
 
          Put_Line (" 🅾 ーIncrease Refresh 🅿 ーDecrease Refresh");
 
+         Move_Cursor_To
+           (Commands_Main_Screen_X_Right,
+            Commands_Main_Screen_Y_Right + 3);
+
+         Put_Line (" 🆂 ーShow splash screen");
+
       else
          Move_Cursor_To
            (Commands_Flight_Recorder_Screen_X,

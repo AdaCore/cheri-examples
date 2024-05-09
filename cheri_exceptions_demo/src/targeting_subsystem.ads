@@ -46,6 +46,8 @@ package Targeting_Subsystem is
 
       function Get_Degraded return Boolean;
 
+      procedure Reset;
+
    private
 
       Targets : Target_List (1 .. Radar_Subsystem.Max_Tracks) := (others => 0);

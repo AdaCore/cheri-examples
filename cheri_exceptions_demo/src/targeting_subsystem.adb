@@ -74,6 +74,18 @@ package body Targeting_Subsystem is
 
       function Get_Degraded return Boolean is (Degraded);
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Targets         := (others => 0);
+         Targets_Changed := True;
+         Count           := 0;
+         Degraded        := False;
+      end Reset;
+
    end Targeting_Data;
 
    ------------------------

@@ -39,6 +39,8 @@ package Countermeasures_Subsystem is
 
       procedure Make_Ready;
 
+      procedure Reset;
+
    private
 
       Deploy_Requested : Boolean     := False;

@@ -95,6 +95,15 @@ package body Radar_Subsystem is
          Num_Tracks_Changed := True;
       end Clear_Tracks;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Clear_Tracks;
+      end Reset;
+
    end Radar_Data;
 
    -------------------

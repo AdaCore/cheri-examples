@@ -63,6 +63,8 @@ package Stores_Subsystem is
       --  Notification that the targetting system state has changed. Stores
       --  and targetting are tightly coupled by design.
 
+      procedure Reset;
+
    private
 
       Light_Status : Light_Status_Array         := (others => Ready);

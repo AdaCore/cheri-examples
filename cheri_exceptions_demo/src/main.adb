@@ -19,10 +19,14 @@ with Ada.Text_IO;
 with System;
 with System.Storage_Elements; use System.Storage_Elements;
 with Countermeasures_Subsystem;
+with Fuel_Subsystem;
+with Navigation_Subsystem;
 with Radar_Subsystem;
 with Stores_Subsystem;
+with Targeting_Subsystem;
 with Display; use Display;
 with Splash_Screen;
+with Monitored_Tasking; use Monitored_Tasking;
 
 --  The environment task is responsible for handling input command key presses
 
@@ -44,6 +48,20 @@ begin
       Splash_Screen.Key_Press;
 
       if Display.Get_Current_Screen = Main_Splash_Screen then
+
+         --  Reset the demo state when transitioning off the splash screen
+
+         Countermeasures_Subsystem.Countermeasures_Control.Reset;
+         Fuel_Subsystem.Fuel_Data.Reset;
+         Navigation_Subsystem.Navigation_Data.Reset;
+         Radar_Subsystem.Radar_Data.Reset;
+         Stores_Subsystem.Stores_Data.Reset;
+         Targeting_Subsystem.Targeting_Data.Reset;
+
+         if Radar_Subsystem.Radar_Task_Control.Get_Status = Compromised then
+            Radar_Subsystem.Radar_Task_Control.Reset;
+         end if;
+
          Display.Show_Main_Avionics_Screen;
       else
 
@@ -74,6 +92,9 @@ begin
 
          when 'm' | 'M' =>
             Display.Show_Main_Avionics_Screen;
+
+         when 's' | 'S' =>
+            Display.Show_Splash_Screen_Screen;
 
          when others =>
             null;

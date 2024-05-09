@@ -51,6 +51,8 @@ package Navigation_Subsystem is
 
       procedure Set_Heading (Heading : Bearing);
 
+      procedure Reset;
+
    private
 
       Current_Position : Coordinate := (0.0, 0.0);

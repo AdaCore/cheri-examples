@@ -82,6 +82,17 @@ package body Countermeasures_Subsystem is
          Status := Ready;
       end Make_Ready;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         Deploy_Requested := False;
+         Status_Change    := True;
+         Status           := Ready;
+      end Reset;
+
    end Countermeasures_Control;
 
    ------------------------------

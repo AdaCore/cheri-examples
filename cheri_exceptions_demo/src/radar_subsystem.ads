@@ -77,6 +77,8 @@ package Radar_Subsystem is
 
       procedure Clear_Tracks;
 
+      procedure Reset;
+
    private
 
       Operational_Flag : Boolean := False;

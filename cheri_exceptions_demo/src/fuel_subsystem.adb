@@ -125,6 +125,21 @@ package body Fuel_Subsystem is
          Time_To_Minimum_Fuel_Valid   := True;
       end Set_Time_To_Minimum_Fuel;
 
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset is
+      begin
+         FQI_Value   := Initial_FQI_Value;
+         FQI_Valid   := True;
+         FQI_Changed := True;
+
+         Time_To_Minimum_Fuel_Value       := 0.0;
+         Time_To_Minimum_Fuel_Valid       := False;
+         Time_To_Minimum_Fuel_Has_Changed := True;
+      end Reset;
+
    end Fuel_Data;
 
    ------------------------
