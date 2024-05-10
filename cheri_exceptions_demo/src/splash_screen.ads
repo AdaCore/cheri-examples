@@ -25,6 +25,9 @@ package Splash_Screen is
    procedure Display_Splash_Screen;
    --  Launch the splash screen
 
+   procedure Display_Splash_Screen_2;
+   --  Launch the QR splash screen
+
    procedure Display_Dynamic_Splash_Screen;
    --  Animate the screen
 
@@ -35,10 +38,13 @@ private
 
    Allowed_Idle_Timing_Event : Timing_Event;
    Allowed_Idle_Time    : constant Time_Span := Milliseconds (120_000);
-   Animate_Time         : constant Time_Span := Milliseconds (5_000);
-   Time_To_Next_Animate : Time;
+   Animate_Time         : constant Time_Span := Milliseconds (2_000);
+   Splash_Switch_Time   : constant Time_Span := Milliseconds (15_000);
+   Time_To_Next_Animate          : Time := Clock + Animate_Time;
+   Time_To_Switch_Splash_Screens : Time := Clock + Splash_Switch_Time;
    Colour_1 : Text_Colour := White;
    Colour_2 : Text_Colour := Yellow;
+   Showing_Splash_Screen_1 : Boolean := True;
 
    protected Protected_Timer_Event with
      Priority => System.Interrupt_Priority'Last
