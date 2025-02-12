@@ -4,9 +4,9 @@
  *  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  **/
 
-#ifndef __ALLOC_H__
-#define __ALLOC_H__
+#ifndef __MALICIOUS_LIB_H__
+#define __MALICIOUS_LIB_H__
 
-void *alloc(size_t);
+void malicious_lib(void);
 
 #endif
