@@ -55,7 +55,7 @@ unsigned char *get_heap(void **got_entry, void *allocation)
        // Check that the capability the GOT entry capability points at
        // is a superset of the allocation. This case means we found the
        // heap capability.
-       && __builtin_cheri_subset_test(*got_entry, allocation)
+       && __builtin_cheri_subset_test(allocation, *got_entry)
     ) {
         return *got_entry;
     }
