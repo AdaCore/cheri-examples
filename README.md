@@ -13,3 +13,8 @@ The [Return Oriented Programming Demo](return_oriented_programming/README.md) ev
 ## Heap Corruption
 
 The [Heap Corruption Demo](heap_corruption/README.md) dives deeper into the architecure of a CHERI application to show the limits of CHERI's protection mechanisms.
+
+## CheriBSD Heap Corruption
+
+The [CheriBSD Heap Corruption Demo](cheribsd_heap_corruption/README.md) applies the bare metal heap corruption to an application running on CheriBSD. It also evaluates
+the effect of CheriBSD's compartmentalization feature on that demo.
