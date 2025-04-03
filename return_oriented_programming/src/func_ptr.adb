@@ -31,7 +31,7 @@ is
       use type System.Address;
       use type System.Storage_Elements.Storage_Offset;
       Call_Addr : constant System.Address :=
-         P1'Address + System.Storage_Elements.Storage_Offset (Off);
+         P1'Address + System.Storage_Elements.Storage_Offset (Offset);
       procedure P with
          Import,
          Address => Call_Addr;
