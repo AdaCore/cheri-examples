@@ -1,8 +1,7 @@
-with "config/cheri_rop_config.gpr";
 project Cheri_Rop is
 
    for Source_Dirs use ("src/", "config/");
-   for Object_Dir use "obj/" & Cheri_Rop_Config.Build_Profile;
+   for Object_Dir use "obj";
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "bin";
    for Target use "morello-elf";
@@ -15,7 +14,15 @@ project Cheri_Rop is
    );
 
    package Compiler is
-      for Default_Switches ("Ada") use Cheri_Rop_Config.Ada_Compiler_Switches & ("-g", "-gnatp");
+      for Default_Switches ("Ada") use (
+            "-Og" -- Optimize for debugging
+           ,"-gnatn" -- Enable inlining
+           ,"-ffunction-sections" -- Separate ELF section for each function
+           ,"-fdata-sections" -- Separate ELF section for each variable
+           ,"-gnatW8" -- UTF-8 encoding for wide characters
+           ,"-g" -- Enable debugging
+           ,"-gnatp" -- Suppress all checks
+          );
    end Compiler;
 
    package Binder is

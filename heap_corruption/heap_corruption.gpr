@@ -1,8 +1,7 @@
-with "config/heap_corruption_config.gpr";
 project Heap_Corruption is
 
    for Source_Dirs use ("src/", "config/");
-   for Object_Dir use "obj/" & Heap_Corruption_Config.Build_Profile;
+   for Object_Dir use "obj";
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "bin";
    for Main use ("heap_corruption.adb");
@@ -11,7 +10,14 @@ project Heap_Corruption is
    for Runtime ("Ada") use "light-morello-semihosting";
 
    package Compiler is
-      for Default_Switches ("Ada") use Heap_Corruption_Config.Ada_Compiler_Switches;
+      for Default_Switches ("Ada") use (
+            "-Og" -- Optimize for debugging
+           ,"-gnatn" -- Enable inlining
+           ,"-ffunction-sections" -- Separate ELF section for each function
+           ,"-fdata-sections" -- Separate ELF section for each variable
+           ,"-gnatW8" -- UTF-8 encoding for wide characters
+           ,"-g" -- Enable debugging
+          );
       for Default_Switches ("C") use ("-Og", "-g");
    end Compiler;
 
